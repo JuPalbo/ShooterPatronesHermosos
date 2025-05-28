@@ -2,6 +2,8 @@
 package frc.robot
 
 import edu.wpi.first.wpilibj.RobotBase
+import frc.Shooter.ShooterConfig
+import frc.Shooter.shooterConfig
 
 /**
  * Main initialization function. Do not perform any initialization here
