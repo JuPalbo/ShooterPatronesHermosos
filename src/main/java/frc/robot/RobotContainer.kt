@@ -1,6 +1,7 @@
 package frc.robot
 
 import edu.wpi.first.units.Units
+import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.Shooter.ShooterConfig
@@ -28,7 +29,7 @@ object RobotContainer
 {
     // Replace with CommandPS4Controller or CommandJoystick if needed
     private val driverController = CommandXboxController(OperatorConstants.controllerId)
-    private val Shooter = Shooter(shooterConfig)
+    private val shooter = Shooter(shooterConfig)
 
     init
     {
@@ -54,6 +55,17 @@ object RobotContainer
         // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
         // cancelling on release.
         //driverController.b().whileTrue(ExampleSubsystem.exampleMethodCommand())
-        driverController.rightTrigger().whileTrue(Shooter.outTakeCMD(Units.Volts.of(20.0)))
+        driverController.leftTrigger()
+            .whileTrue(
+                Commands.run(
+                    { shooter.setVoltage(Units.Volts.of(10.0)) }
+                    , shooter))
+            .onFalse(
+                Commands.run(
+                    { shooter.stopMotors() }
+                    , shooter))
+
+
+        driverController.rightTrigger().whileTrue(shooter.shootCMD(Units.Volts.of(10.0)))
     }
 }

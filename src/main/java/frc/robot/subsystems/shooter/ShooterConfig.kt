@@ -17,13 +17,17 @@ data class ShooterConfig(
     val motorDirection: RotationalDirection,
     val motorCurrentLimit: Current,
     val reduction: Reduction,
+    val shootVoltageLowLimit: Double,
+    val shootVoltageHighLimit: Double,
 )
 val shooterConfig = ShooterConfig(
     motorProperties = Motors.neo,
-    leadMotorControllerId = 1,
-    followerMotorId = 1,
-    motorDirection = Clockwise,
+    leadMotorControllerId = 1,  // Check the actual ID
+    followerMotorId = 1,        // Check the actual ID
+    motorDirection = Clockwise, // Check the actual direction
     motorCurrentLimit = Units.Amp.of(40.0),
     reduction = Reduction(20.0),
+    shootVoltageLowLimit = -12.0,
+    shootVoltageHighLimit = 12.0
 )
 

@@ -1,21 +1,13 @@
 package frc.robot.subsystems.shooter
 
-import com.ctre.phoenix6.configs.TalonFXConfiguration
-import com.ctre.phoenix6.controls.VoltageOut
-import com.ctre.phoenix6.hardware.TalonFX
-import com.ctre.phoenix6.signals.NeutralModeValue
-import com.ctre.phoenix6.controls.Follower
-
-import com.revrobotics.*
 import com.revrobotics.spark.SparkBase
 import com.revrobotics.spark.SparkLowLevel
 import com.revrobotics.spark.SparkMax
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode
 import com.revrobotics.spark.config.SparkMaxConfig
+import edu.wpi.first.math.MathUtil
 
-import edu.wpi.first.units.measure.Voltage.*
 import edu.wpi.first.units.Units
-import edu.wpi.first.units.measure.AngularVelocity
 import edu.wpi.first.units.measure.Voltage
 
 import edu.wpi.first.wpilibj2.command.Command
@@ -27,23 +19,19 @@ class Shooter(private val config: ShooterConfig) : SubsystemBase() {
     private val leadMotorController = SparkMax(config.leadMotorControllerId, SparkLowLevel.MotorType.kBrushless)
     private val followerMotorController = SparkMax(config.followerMotorId, SparkLowLevel.MotorType.kBrushless)
 
-    val ForwardsRunningCondition = { true }
-    val BackwardsRunningCondition = { true }
-
     /**
-     * This function accepts voltage and passes it to the motor controller
+     * This function accepts voltage and passes it to the motor controller within a safe
+     * range for the robot
      * @param voltage the desired voltage for the motor
-     * @return A voltage to the motor controller
      */
-    private fun setVoltage(voltage: Voltage) {
-        val voltageRequest = VoltageOut(voltage)
-        leadMotorController.setVoltage(voltage)
+    fun setVoltage(voltage: Voltage) {
+        val clampedVoltage = MathUtil.clamp(voltage.`in`(Units.Volts), config.shootVoltageLowLimit, config.shootVoltageHighLimit)
+        leadMotorController.setVoltage(clampedVoltage)
     }
 
     /**
      * This function is able to set the motor's voltage to 0 and therefore, stop the motor's
      * interaction
-     * @return A previously set voltage for the motors, in this case it would be 0.
      */
     fun stopMotors() : Command = Commands.run({setVoltage(Units.Volts.of(0.0))})
 
@@ -54,7 +42,7 @@ class Shooter(private val config: ShooterConfig) : SubsystemBase() {
      * @param voltage the desired voltage to set to the motors
      * @return a command that sets a voltage to the subsystem's motors.
      */
-    fun outTakeCMD(voltage: Voltage) : Command = Commands.startEnd(
+    fun shootCMD(voltage: Voltage) : Command = Commands.startEnd(
         { setVoltage(voltage) },
         { stopMotors() },
         this)
@@ -66,27 +54,29 @@ class Shooter(private val config: ShooterConfig) : SubsystemBase() {
     /**
      * Configures the motors' Idle Mode, positive direction, current limit and clears Spark's
      * faults.
-     * @return the SparkMax desired configuration
      */
     private fun configureMotorsInterface() {
-        val sparkMaxConfig = SparkMaxConfig()
+        val globalConfig = SparkMaxConfig()
+        val followerConfig = SparkMaxConfig()
 
-        with(sparkMaxConfig) {
+        with(globalConfig) {
             idleMode(IdleMode.kBrake).inverted(
                 config.motorDirection.opposite() == config.motorProperties.positiveDirection
             ).smartCurrentLimit(config.motorCurrentLimit.`in`(Units.Amps).toInt())
         }
 
+        //Apply a follow method to set both motors at the same time
+        followerConfig.apply(globalConfig).follow(config.leadMotorControllerId, false) // Might change inverted
+
         leadMotorController.clearFaults()
         followerMotorController.clearFaults()
 
         leadMotorController.configure(
-            sparkMaxConfig, SparkBase.ResetMode.kResetSafeParameters,SparkBase.PersistMode.kNoPersistParameters
+            globalConfig, SparkBase.ResetMode.kResetSafeParameters,SparkBase.PersistMode.kNoPersistParameters
         )
         followerMotorController.configure(
-            sparkMaxConfig, SparkBase.ResetMode.kResetSafeParameters,SparkBase.PersistMode.kNoPersistParameters
+            followerConfig, SparkBase.ResetMode.kResetSafeParameters,SparkBase.PersistMode.kNoPersistParameters
         )
-
     }
 }
 
