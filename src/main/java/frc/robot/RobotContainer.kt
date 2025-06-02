@@ -48,11 +48,12 @@ object RobotContainer
     {
         // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
         //Trigger { ExampleSubsystem.exampleCondition() }.onTrue(ExampleCommand())
+        //Trigger { Shooter.ForwardsRunningCondition() }.onTrue(Shooter.outTakeCMD(Units.Volts.of(20.0)))
 
 
         // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
         // cancelling on release.
         //driverController.b().whileTrue(ExampleSubsystem.exampleMethodCommand())
-        driverController.a().whileTrue(Shooter.outTakeCMD(Units.Volts.of(20.0)))
+        driverController.rightTrigger().whileTrue(Shooter.outTakeCMD(Units.Volts.of(20.0)))
     }
 }

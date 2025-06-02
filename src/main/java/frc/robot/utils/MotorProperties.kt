@@ -1,5 +1,6 @@
 package frc.robot.utils
 
+
 data class MotorProperties(
 
     val positiveDirection: RotationalDirection

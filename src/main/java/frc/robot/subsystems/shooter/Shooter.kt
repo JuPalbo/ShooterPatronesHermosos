@@ -40,8 +40,20 @@ class Shooter(private val config: ShooterConfig) : SubsystemBase() {
         leadMotorController.setVoltage(voltage)
     }
 
+    /**
+     * This function is able to set the motor's voltage to 0 and therefore, stop the motor's
+     * interaction
+     * @return A previously set voltage for the motors, in this case it would be 0.
+     */
     fun stopMotors() : Command = Commands.run({setVoltage(Units.Volts.of(0.0))})
 
+    /**
+     * The outTakeCMD Command is able to set a desired voltage to the motors when
+     * the command is firstly called and when interrupted, it will completely
+     * stop the motors.
+     * @param voltage the desired voltage to set to the motors
+     * @return a command that sets a voltage to the subsystem's motors.
+     */
     fun outTakeCMD(voltage: Voltage) : Command = Commands.startEnd(
         { setVoltage(voltage) },
         { stopMotors() },
@@ -49,9 +61,13 @@ class Shooter(private val config: ShooterConfig) : SubsystemBase() {
 
     init {
         configureMotorsInterface()
-
     }
 
+    /**
+     * Configures the motors' Idle Mode, positive direction, current limit and clears Spark's
+     * faults.
+     * @return the SparkMax desired configuration
+     */
     private fun configureMotorsInterface() {
         val sparkMaxConfig = SparkMaxConfig()
 
