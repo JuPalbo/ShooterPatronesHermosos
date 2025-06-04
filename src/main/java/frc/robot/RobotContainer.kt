@@ -58,14 +58,14 @@ object RobotContainer
         driverController.leftTrigger()
             .whileTrue(
                 Commands.run(
-                    { shooter.setVoltage(Units.Volts.of(10.0)) }
+                    { shooter.setVoltage(Units.Volts.of(8.0)) }
                     , shooter))
             .onFalse(
                 Commands.run(
-                    { shooter.stopMotors() }
+                    shooter::stopMotors
                     , shooter))
 
 
-        driverController.rightTrigger().whileTrue(shooter.shootCMD(Units.Volts.of(10.0)))
+        driverController.rightTrigger().whileTrue(shooter.shootCMD(Units.Volts.of(-8.0))).onFalse(shooter.stopMotors())
     }
 }

@@ -42,9 +42,8 @@ class Shooter(private val config: ShooterConfig) : SubsystemBase() {
      * @param voltage the desired voltage to set to the motors
      * @return a command that sets a voltage to the subsystem's motors.
      */
-    fun shootCMD(voltage: Voltage) : Command = Commands.startEnd(
+    fun shootCMD(voltage: Voltage) : Command = Commands.run(
         { setVoltage(voltage) },
-        { stopMotors() },
         this)
 
     init {

@@ -22,8 +22,8 @@ data class ShooterConfig(
 )
 val shooterConfig = ShooterConfig(
     motorProperties = Motors.neo,
-    leadMotorControllerId = 1,  // Check the actual ID
-    followerMotorId = 1,        // Check the actual ID
+    leadMotorControllerId = 51,  // Check the actual ID
+    followerMotorId = 31,        // Check the actual ID
     motorDirection = Clockwise, // Check the actual direction
     motorCurrentLimit = Units.Amp.of(40.0),
     reduction = Reduction(20.0),
