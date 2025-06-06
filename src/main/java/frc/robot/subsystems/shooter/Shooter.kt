@@ -34,7 +34,6 @@ class Shooter(private val config: ShooterConfig) : SubsystemBase() {
 
     fun currentMode() = currentShooterMode
 
-    fun changeMode() = currentShooterMode.changeMode()
     /**
      * This function accepts voltage and passes it to the motor controller within a safe
      * range for the robot
