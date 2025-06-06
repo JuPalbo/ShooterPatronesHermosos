@@ -10,29 +10,34 @@ import edu.wpi.first.math.MathUtil
 import edu.wpi.first.units.Units
 import edu.wpi.first.units.Units.Volts
 import edu.wpi.first.units.measure.Voltage
-import edu.wpi.first.wpilibj2.command.Command
-import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 
 import frc.Shooter.ShooterConfig
 import frc.Shooter.shooterConfig
-import frc.robot.utils.ShooterState
-import frc.robot.utils.ShooterState.TriggerMode
-import frc.robot.utils.ShooterState.ButtonMode
 
+enum class ShooterState {
+    TriggerMode,
+    ButtonMode
+}
 
 class Shooter(private val config: ShooterConfig) : SubsystemBase() {
     private val leadMotorController = SparkMax(config.leadMotorControllerId, SparkLowLevel.MotorType.kBrushless)
     private val followerMotorController = SparkMax(config.followerMotorId, SparkLowLevel.MotorType.kBrushless)
     private var voltageOutPut = Volts.of(0.0)
-    private var currentShooterMode = TriggerMode
+    private var currentShooterMode = ShooterState.TriggerMode
 
     override fun periodic() {
         val clampedVoltage = MathUtil.clamp(voltageOutPut.`in`(Volts), shooterConfig.shootVoltageLowLimit, shooterConfig.shootVoltageHighLimit)
         leadMotorController.setVoltage(clampedVoltage)
     }
 
-    fun currentMode() = currentShooterMode
+    fun currentState() = currentShooterMode
+    fun changeState() {
+        currentShooterMode =
+            if (currentState() == ShooterState.ButtonMode) ShooterState.TriggerMode
+            else ShooterState.ButtonMode
+    }
+
 
     /**
      * This function accepts voltage and passes it to the motor controller within a safe
@@ -43,12 +48,17 @@ class Shooter(private val config: ShooterConfig) : SubsystemBase() {
         voltageOutPut = voltage
     }
 
+    /**
+     * Adds, to the current voltage output, the desired volts
+     * @param voltage the desired voltage to add
+     * @return returns a new voltage value that is set to the motor
+     */
     fun addVolts(voltage: Voltage) {
         voltageOutPut = voltageOutPut.plus(voltage)
     }
 
     /**
-     * Subtracts from the current voltage output the desired volts
+     * Subtracts, to the current voltage output, the desired volts
      * @param voltage the desired voltage to subtract
      * @return returns a new voltage value that is set to the motor
      */
@@ -63,17 +73,6 @@ class Shooter(private val config: ShooterConfig) : SubsystemBase() {
     fun stopMotors() {
         voltageOutPut = Volts.of(0.0)
     }
-
-    /**
-     * The outTakeCMD Command is able to set a desired voltage to the motors when
-     * the command is firstly called and when interrupted, it will completely
-     * stop the motors.
-     * @param voltage the desired voltage to set to the motors
-     * @return a command that sets a voltage to the subsystem's motors.
-     */
-    fun shootCMD(voltage: Voltage) : Command = Commands.run(
-        { setVoltage(voltage) },
-        this)
 
     init {
         configureMotorsInterface()

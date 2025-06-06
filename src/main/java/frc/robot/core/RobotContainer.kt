@@ -12,9 +12,7 @@ import frc.Shooter.shooterConfig
 import frc.robot.core.Constants.OperatorConstants
 import frc.robot.commands.Autos
 import frc.robot.subsystems.shooter.Shooter
-import frc.robot.utils.ShooterState
-import frc.robot.utils.ShooterState.TriggerMode
-import frc.robot.utils.ShooterState.ButtonMode
+import frc.robot.subsystems.shooter.ShooterState
 
 import java.time.Instant
 
@@ -45,20 +43,20 @@ object RobotContainer
     fun teleopInit() {
 
         shooter.defaultCommand = Commands.run({
-            when (shooter.currentMode()) {
-                ButtonMode -> {
+            when (shooter.currentState()) {
+                ShooterState.ButtonMode -> {
+
                     driverController.leftTrigger()
                         .onTrue(InstantCommand({ shooter.setVoltage(Volts.of(-3.0)) }))
                         .onFalse(InstantCommand(shooter::stopMotors))
+
                     driverController.rightTrigger()
                         .onTrue(InstantCommand({ shooter.setVoltage(Volts.of(3.0)) }))
                         .onFalse(InstantCommand(shooter::stopMotors))
-
-                    driverController.b().onTrue(InstantCommand({ shooter.addVolts(Volts.of(1.0)) }))
-                    driverController.a().onTrue(InstantCommand({ shooter.subtractsVolts(Volts.of(1.0)) }))
                 }
 
-                TriggerMode ->
+                ShooterState.TriggerMode ->
+
                     if (driverController.rightTriggerAxis > 0.1) {
                         shooter.setVoltage(Volts.of(10.0.times(driverController.rightTriggerAxis)))
                     } else if (driverController.leftTriggerAxis > 0.1) {
@@ -88,6 +86,9 @@ object RobotContainer
         // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
         // cancelling on release.
         //driverController.b().whileTrue(ExampleSubsystem.exampleMethodCommand())
-        driverController.x().onTrue(InstantCommand({ shooter.currentMode().changeMode()}))
+        driverController.b().onTrue(InstantCommand({ shooter.addVolts(Volts.of(1.0)) }))
+        driverController.a().onTrue(InstantCommand({ shooter.subtractsVolts(Volts.of(1.0)) }))
+        driverController.x().onTrue(InstantCommand({ shooter.changeState()}))
+        driverController.y().onTrue(InstantCommand({ println(shooter.currentState().toString())}))
         }
     }
