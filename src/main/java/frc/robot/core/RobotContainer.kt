@@ -1,13 +1,11 @@
 package frc.robot.core
 
-import edu.wpi.first.units.Units
 import edu.wpi.first.units.Units.Volts
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 
-import frc.Shooter.ShooterConfig.*
 import frc.Shooter.shooterConfig
 import frc.robot.core.Constants.OperatorConstants
 import frc.robot.commands.Autos
@@ -41,7 +39,9 @@ object RobotContainer
     }
 
     fun teleopInit() {
-
+        /**
+         * Sets the default command to either one of the two shooter states and configures it's bindings
+         */
         shooter.defaultCommand = Commands.run({
             when (shooter.currentState()) {
                 ShooterState.ButtonMode -> {
@@ -77,18 +77,20 @@ object RobotContainer
      * subclasses such for [Xbox][CommandXboxController]/[PS4][edu.wpi.first.wpilibj2.command.button.CommandPS4Controller]
      * controllers or [Flight joysticks][edu.wpi.first.wpilibj2.command.button.CommandJoystick].
      */
-    fun configureBindings() {
+    private fun configureBindings() {
         // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
         //Trigger { ExampleSubsystem.exampleCondition() }.onTrue(ExampleCommand())
-        //Trigger { Shooter.ForwardsRunningCondition() }.onTrue(Shooter.outTakeCMD(Units.Volts.of(20.0)))
 
-
-        // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
-        // cancelling on release.
-        //driverController.b().whileTrue(ExampleSubsystem.exampleMethodCommand())
+        //Adds one volt to the current voltage output
         driverController.b().onTrue(InstantCommand({ shooter.addVolts(Volts.of(1.0)) }))
+
+        //Subtracts one volt from the current voltage output
         driverController.a().onTrue(InstantCommand({ shooter.subtractsVolts(Volts.of(1.0)) }))
+
+        //Changes from Button State to Trigger State and vice versa
         driverController.x().onTrue(InstantCommand({ shooter.changeState()}))
+
+        //Prints the current shooter State so the user knows which bindings are available
         driverController.y().onTrue(InstantCommand({ println(shooter.currentState().toString())}))
         }
     }
