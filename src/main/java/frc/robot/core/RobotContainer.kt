@@ -1,18 +1,22 @@
-package frc.robot
+package frc.robot.core
 
 import edu.wpi.first.units.Units
+import edu.wpi.first.units.Units.Volts
 import edu.wpi.first.wpilibj2.command.Commands
+import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
-import frc.Shooter.ShooterConfig
 
 import frc.Shooter.ShooterConfig.*
 import frc.Shooter.shooterConfig
-import frc.robot.Constants.OperatorConstants
+import frc.robot.core.Constants.OperatorConstants
 import frc.robot.commands.Autos
-import frc.robot.commands.ExampleCommand
-import frc.robot.subsystems.ExampleSubsystem
 import frc.robot.subsystems.shooter.Shooter
+import frc.robot.utils.ShooterState
+import frc.robot.utils.ShooterState.TriggerMode
+import frc.robot.utils.ShooterState.ButtonMode
+
+import java.time.Instant
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -38,6 +42,36 @@ object RobotContainer
         Autos
     }
 
+    fun teleopInit() {
+
+        shooter.defaultCommand = Commands.run({
+            when (shooter.currentMode()) {
+                ButtonMode -> {
+                    driverController.leftTrigger()
+                        .onTrue(InstantCommand({ shooter.setVoltage(Volts.of(-3.0)) }))
+                        .onFalse(InstantCommand(shooter::stopMotors))
+                    driverController.rightTrigger()
+                        .onTrue(InstantCommand({ shooter.setVoltage(Volts.of(3.0)) }))
+                        .onFalse(InstantCommand(shooter::stopMotors))
+
+                    driverController.b().onTrue(InstantCommand({ shooter.addVolts(Volts.of(1.0)) }))
+                    driverController.a().onTrue(InstantCommand({ shooter.subtractsVolts(Volts.of(1.0)) }))
+                }
+
+                TriggerMode ->
+                    if (driverController.rightTriggerAxis > 0.1) {
+                        shooter.setVoltage(Volts.of(10.0.times(driverController.rightTriggerAxis)))
+                    } else if (driverController.leftTriggerAxis > 0.1) {
+                        shooter.setVoltage(Volts.of((-10.0).times(driverController.leftTriggerAxis)))
+                    } else run {
+                        shooter.stopMotors()
+                    }
+                }
+            }, shooter
+        )
+    }
+
+
     /**
      * Use this method to define your `trigger->command` mappings. Triggers can be created via the
      * [Trigger] constructor that takes a [BooleanSupplier][java.util.function.BooleanSupplier]
@@ -45,8 +79,7 @@ object RobotContainer
      * subclasses such for [Xbox][CommandXboxController]/[PS4][edu.wpi.first.wpilibj2.command.button.CommandPS4Controller]
      * controllers or [Flight joysticks][edu.wpi.first.wpilibj2.command.button.CommandJoystick].
      */
-    private fun configureBindings()
-    {
+    fun configureBindings() {
         // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
         //Trigger { ExampleSubsystem.exampleCondition() }.onTrue(ExampleCommand())
         //Trigger { Shooter.ForwardsRunningCondition() }.onTrue(Shooter.outTakeCMD(Units.Volts.of(20.0)))
@@ -55,17 +88,6 @@ object RobotContainer
         // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
         // cancelling on release.
         //driverController.b().whileTrue(ExampleSubsystem.exampleMethodCommand())
-        driverController.leftTrigger()
-            .whileTrue(
-                Commands.run(
-                    { shooter.setVoltage(Units.Volts.of(8.0)) }
-                    , shooter))
-            .onFalse(
-                Commands.run(
-                    shooter::stopMotors
-                    , shooter))
-
-
-        driverController.rightTrigger().whileTrue(shooter.shootCMD(Units.Volts.of(-8.0))).onFalse(shooter.stopMotors())
+        driverController.x().onTrue(InstantCommand({ shooter.changeMode()}))
+        }
     }
-}

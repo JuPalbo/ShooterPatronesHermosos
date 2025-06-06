@@ -1,9 +1,7 @@
 @file:JvmName("Main") // set the compiled Java class name to "Main" rather than "MainKt"
-package frc.robot
+package frc.robot.core
 
 import edu.wpi.first.wpilibj.RobotBase
-import frc.Shooter.ShooterConfig
-import frc.Shooter.shooterConfig
 
 /**
  * Main initialization function. Do not perform any initialization here

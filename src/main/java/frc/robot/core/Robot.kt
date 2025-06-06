@@ -1,4 +1,4 @@
-package frc.robot
+package frc.robot.core
 
 import edu.wpi.first.hal.FRCNetComm.tInstances
 import edu.wpi.first.hal.FRCNetComm.tResourceType
@@ -87,6 +87,7 @@ object Robot : TimedRobot()
 
     override fun teleopInit()
     {
+        RobotContainer.teleopInit()
         // This makes sure that the autonomous stops running when teleop starts running. If you want the
         // autonomous to continue until interrupted by another command, remove this line or comment it out.
         autonomousCommand.cancel()

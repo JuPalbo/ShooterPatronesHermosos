@@ -8,32 +8,62 @@ import com.revrobotics.spark.config.SparkMaxConfig
 import edu.wpi.first.math.MathUtil
 
 import edu.wpi.first.units.Units
+import edu.wpi.first.units.Units.Volts
 import edu.wpi.first.units.measure.Voltage
-
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+
 import frc.Shooter.ShooterConfig
+import frc.Shooter.shooterConfig
+import frc.robot.utils.ShooterState
+import frc.robot.utils.ShooterState.TriggerMode
+import frc.robot.utils.ShooterState.ButtonMode
+
 
 class Shooter(private val config: ShooterConfig) : SubsystemBase() {
     private val leadMotorController = SparkMax(config.leadMotorControllerId, SparkLowLevel.MotorType.kBrushless)
     private val followerMotorController = SparkMax(config.followerMotorId, SparkLowLevel.MotorType.kBrushless)
+    private var voltageOutPut = Volts.of(0.0)
+    private var currentShooterMode = TriggerMode
 
+    override fun periodic() {
+        val clampedVoltage = MathUtil.clamp(voltageOutPut.`in`(Volts), shooterConfig.shootVoltageLowLimit, shooterConfig.shootVoltageHighLimit)
+        leadMotorController.setVoltage(clampedVoltage)
+    }
+
+    fun currentMode() = currentShooterMode
+
+    fun changeMode() = currentShooterMode.changeMode()
     /**
      * This function accepts voltage and passes it to the motor controller within a safe
      * range for the robot
      * @param voltage the desired voltage for the motor
      */
     fun setVoltage(voltage: Voltage) {
-        val clampedVoltage = MathUtil.clamp(voltage.`in`(Units.Volts), config.shootVoltageLowLimit, config.shootVoltageHighLimit)
-        leadMotorController.setVoltage(clampedVoltage)
+        voltageOutPut = voltage
+    }
+
+    fun addVolts(voltage: Voltage) {
+        voltageOutPut = voltageOutPut.plus(voltage)
+    }
+
+    /**
+     * Subtracts from the current voltage output the desired volts
+     * @param voltage the desired voltage to subtract
+     * @return returns a new voltage value that is set to the motor
+     */
+    fun subtractsVolts(voltage: Voltage) {
+        voltageOutPut = voltageOutPut.minus(voltage)
     }
 
     /**
      * This function is able to set the motor's voltage to 0 and therefore, stop the motor's
      * interaction
      */
-    fun stopMotors() : Command = Commands.run({setVoltage(Units.Volts.of(0.0))})
+    fun stopMotors() {
+        voltageOutPut = Volts.of(0.0)
+    }
 
     /**
      * The outTakeCMD Command is able to set a desired voltage to the motors when
@@ -51,7 +81,7 @@ class Shooter(private val config: ShooterConfig) : SubsystemBase() {
     }
 
     /**
-     * Configures the motors' Idle Mode, positive direction, current limit and clears Spark's
+     * Configures the motors' desired sets, such as: Idle Mode, positive direction, current limit and clears Spark's
      * faults.
      */
     private fun configureMotorsInterface() {

@@ -1,7 +1,4 @@
-package frc.robot
-
-import edu.wpi.first.wpilibj.XboxController
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController
+package frc.robot.core
 
 /*
  * The Constants file provides a convenient place for teams to hold robot-wide
