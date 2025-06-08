@@ -3,26 +3,25 @@ package frc.robot.subsystems.shooter
 import com.revrobotics.spark.SparkBase
 import com.revrobotics.spark.SparkLowLevel
 import com.revrobotics.spark.SparkMax
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode
 import com.revrobotics.spark.config.SparkMaxConfig
 import edu.wpi.first.math.MathUtil
 
-import edu.wpi.first.units.Units
-import edu.wpi.first.units.Units.Volts
-import edu.wpi.first.units.measure.Voltage
+import edu.wpi.first.units.Units.*
+import edu.wpi.first.units.measure.*
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 
-import frc.Shooter.ShooterConfig
-import frc.Shooter.shooterConfig
-
+/**
+ * The [ShooterState] enum class creates two states that the shooter can be on, either [ButtonMode]
+ * or [TriggerMode].
+ */
 enum class ShooterState {
     TriggerMode,
     ButtonMode
 }
 
 class Shooter(private val config: ShooterConfig) : SubsystemBase() {
-    private val leadMotorController = SparkMax(config.leadMotorControllerId, SparkLowLevel.MotorType.kBrushless)
-    private val followerMotorController = SparkMax(config.followerMotorId, SparkLowLevel.MotorType.kBrushless)
+    private val leadMotorController = SparkMax(config.leadMotorControllerId.id, SparkLowLevel.MotorType.kBrushless)
+    private val followerMotorController = SparkMax(config.followerMotorId.id, SparkLowLevel.MotorType.kBrushless)
 
     /**
      * Tracks the voltage that is being given to the motors and passes it to [periodic]
@@ -38,9 +37,13 @@ class Shooter(private val config: ShooterConfig) : SubsystemBase() {
     /**
      * Constantly checks if any voltage has been given to the motors in order to update and set it
      * immediately, then, clamps it to prevent excessive voltage to be given to the motors.
+     * @return a new voltage to set to the motor
      */
     override fun periodic() {
-        val clampedVoltage = MathUtil.clamp(voltageOutPut.`in`(Volts), shooterConfig.shootVoltageLowLimit, shooterConfig.shootVoltageHighLimit)
+        val clampedVoltage =
+            MathUtil.clamp(voltageOutPut.`in`(Volts)
+                , shooterConfig.shootVoltageLowLimit.`in`(Volts)
+                , shooterConfig.shootVoltageHighLimit.`in`(Volts))
         leadMotorController.setVoltage(clampedVoltage)
     }
 
@@ -108,13 +111,13 @@ class Shooter(private val config: ShooterConfig) : SubsystemBase() {
 
         //Setting an idle mode, giving an inverted value and establishing a current limit to the motor's
         with(globalConfig) {
-            idleMode(IdleMode.kBrake).inverted(
+            idleMode(config.motorProperties.neutralMode).inverted(
                 config.motorDirection.opposite() == config.motorProperties.positiveDirection
-            ).smartCurrentLimit(config.motorCurrentLimit.`in`(Units.Amps).toInt())
+            ).smartCurrentLimit(config.motorProperties.currentLimit.`in`(Amps).toInt())
         }
 
         //Apply a follow method to set both motors at the same time
-        followerConfig.apply(globalConfig).follow(config.leadMotorControllerId, false) // Might change inverted
+        followerConfig.apply(globalConfig).follow(config.leadMotorControllerId.id, false) // Might change inverted
 
         //Clear the Spark´s faults
         leadMotorController.clearFaults()

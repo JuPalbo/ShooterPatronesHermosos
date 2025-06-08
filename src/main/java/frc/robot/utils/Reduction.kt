@@ -20,14 +20,16 @@ class Reduction(private val ratio: Double) {
      * @return returns full subsystem's output, taking into account
      * the motor's output and the reduction
      */
-    fun <Medidas : Measure<out Unit>> apply(value: Medidas) = value.div(ratio) as Medidas
+    fun <M : Measure<out Unit>> apply(value: M) = value.div(ratio) as M
 
     /**
      * This function un-applies the reduction to the full subsystem's output value
      * so it the motor's value can be used
+     *
      * @param value this is the subsystem value
+     *
      * @return returns the motor´s output, taking into account the full subsystem's
      * output and the system reduction
      */
-    fun <Medidas : Measure<out Unit>> unapply(value: Medidas) = value.times(ratio) as Medidas
+    fun <M : Measure<out Unit>> unapply(value: M) = value.times(ratio) as M
 }

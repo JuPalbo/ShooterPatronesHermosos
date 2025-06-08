@@ -6,13 +6,11 @@ import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 
-import frc.Shooter.shooterConfig
+import frc.robot.subsystems.shooter.shooterConfig
 import frc.robot.core.Constants.OperatorConstants
 import frc.robot.commands.Autos
 import frc.robot.subsystems.shooter.Shooter
 import frc.robot.subsystems.shooter.ShooterState
-
-import java.time.Instant
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -41,6 +39,7 @@ object RobotContainer
     fun teleopInit() {
         /**
          * Sets the default command to either one of the two shooter states and configures it's bindings
+         * and associated commands
          */
         shooter.defaultCommand = Commands.run({
             when (shooter.currentState()) {
