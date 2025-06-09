@@ -43,7 +43,7 @@ object RobotContainer
          */
         shooter.defaultCommand = Commands.run({
             when (shooter.currentState()) {
-                ShooterState.ButtonMode -> {
+                 ShooterState.ButtonMode -> {
 
                     driverController.leftTrigger()
                         .onTrue(InstantCommand({ shooter.setVoltage(Volts.of(-3.0)) }))
@@ -56,12 +56,13 @@ object RobotContainer
 
                 ShooterState.TriggerMode ->
 
-                    if (driverController.rightTriggerAxis > 0.1) {
-                        shooter.setVoltage(Volts.of(10.0.times(driverController.rightTriggerAxis)))
-                    } else if (driverController.leftTriggerAxis > 0.1) {
-                        shooter.setVoltage(Volts.of((-10.0).times(driverController.leftTriggerAxis)))
-                    } else run {
-                        shooter.stopMotors()
+
+                    when {
+                        driverController.rightTriggerAxis > 0.1 ->
+                            shooter.setVoltage(Volts.of(10.0.times(driverController.rightTriggerAxis)))
+                        driverController.leftTriggerAxis > 0.1 ->
+                            shooter.setVoltage(Volts.of((-10.0).times(driverController.leftTriggerAxis)))
+                        else -> shooter.stopMotors()
                     }
                 }
             }, shooter

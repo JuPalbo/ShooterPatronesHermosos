@@ -10,6 +10,8 @@ import edu.wpi.first.units.Units.*
 import edu.wpi.first.units.measure.*
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 
+import frc.robot.subsystems.shooter.ShooterState.*
+
 /**
  * The [ShooterState] enum class creates two states that the shooter can be on, either [ButtonMode]
  * or [TriggerMode].
@@ -32,7 +34,7 @@ class Shooter(private val config: ShooterConfig) : SubsystemBase() {
      * Part of the [ShooterState] enum class. Gives a default [ShooterState] value to a variable for it to
      * be manageable within the code
      */
-    private var currentShooterState = ShooterState.TriggerMode
+    private var currentShooterState = TriggerMode
 
     /**
      * Constantly checks if any voltage has been given to the motors in order to update and set it
@@ -51,7 +53,8 @@ class Shooter(private val config: ShooterConfig) : SubsystemBase() {
      * The currentState() function returns the [ShooterState] that is currently applied to this subsystem
      * @return the current shooter state, either button or trigger state's
      */
-    fun currentState() = currentShooterState
+    @JvmName("ShooterCurrentState")
+    fun currentState(): ShooterState = currentShooterState
 
     /**
      * The changeState() uses the [ShooterState] class to change the current state to it's opposite
@@ -59,8 +62,8 @@ class Shooter(private val config: ShooterConfig) : SubsystemBase() {
      */
     fun changeState() {
         currentShooterState =
-            if (currentState() == ShooterState.ButtonMode) ShooterState.TriggerMode
-            else ShooterState.ButtonMode
+            if (currentState() == ButtonMode) TriggerMode
+            else ButtonMode
     }
 
     /**
