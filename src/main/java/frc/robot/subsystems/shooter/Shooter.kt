@@ -128,12 +128,12 @@ class Shooter(private val config: ShooterConfig) : SubsystemBase() {
 
         //Set the lead motor´s desired configurations
         leadMotorController.configure(
-            globalConfig, SparkBase.ResetMode.kResetSafeParameters,SparkBase.PersistMode.kNoPersistParameters
+            globalConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kNoPersistParameters
         )
 
         //Set the follower motor's desired configurations
         followerMotorController.configure(
-            followerConfig, SparkBase.ResetMode.kResetSafeParameters,SparkBase.PersistMode.kNoPersistParameters
+            followerConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kNoPersistParameters
         )
     }
 }

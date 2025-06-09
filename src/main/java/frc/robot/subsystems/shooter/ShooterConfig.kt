@@ -28,7 +28,7 @@ data class ShooterConfig(
 )
 val shooterConfig = ShooterConfig(
     motorProperties = Motors.neo,
-    leadMotorControllerId = NumericID(51),
+    leadMotorControllerId = NumericID(1),
     followerMotorId = NumericID(31),
     motorDirection = Clockwise, // Check the actual direction ,
     shootVoltageLowLimit = Volts.of(-12.0),
