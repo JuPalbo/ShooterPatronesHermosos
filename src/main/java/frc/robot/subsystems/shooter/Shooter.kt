@@ -11,6 +11,7 @@ import edu.wpi.first.units.measure.*
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 
 import frc.robot.subsystems.shooter.ShooterState.*
+import frc.robot.utils.opposite
 
 /**
  * The [ShooterState] enum class creates two states that the shooter can be on, either [ButtonMode]
@@ -120,7 +121,7 @@ class Shooter(private val config: ShooterConfig) : SubsystemBase() {
         }
 
         //Apply a follow method to set both motors at the same time
-        followerConfig.apply(globalConfig).follow(config.leadMotorControllerId.id, false) // Might change inverted
+        followerConfig.apply(globalConfig).follow(config.leadMotorControllerId.id, true) // Might change inverted
 
         //Clear the Spark´s faults
         leadMotorController.clearFaults()

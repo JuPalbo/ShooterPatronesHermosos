@@ -9,7 +9,8 @@ import frc.robot.utils.RotationalDirection.Clockwise
  * Useful for having a much better understanding on ID´s
  * @property id The ID of the motor, this must be an integer value
  */
-@JvmInline value class NumericID(val id: Int) {
+@JvmInline
+value class NumericID(val id: Int) {
     init {
         require(id > 0) { "$id should be bigger than zero." }
     }

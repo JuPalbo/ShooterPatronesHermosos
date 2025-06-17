@@ -1,6 +1,8 @@
 package frc.robot.utils
 
 import com.ctre.phoenix6.signals.InvertedValue.*
+import frc.robot.utils.RotationalDirection.CounterClockwise
+import frc.robot.utils.RotationalDirection.Clockwise
 
 /**
  * This class is able to set the rotational direction to either clockwise or
@@ -28,10 +30,13 @@ enum class RotationalDirection(private val factor: Int) {
      * The opposite() function returns the opposite to either Clockwise or Counterclockwise
      * @return the opposite of Clockwise or Counterclockwise
      */
-    fun opposite(): RotationalDirection = if (isCounterClockwise()) Clockwise else CounterClockwise
+    //fun opposite(): RotationalDirection = if (isCounterClockwise()) Clockwise else CounterClockwise
     /**
      * The function sets the positive rotational direction to clockwise or counterclockwise
      * @return returns the positive direction for the motor if it needs to be either clockwise or counterclockwise
      */
     fun toInvertedValue() = if (this == Clockwise) Clockwise_Positive else CounterClockwise_Positive
+
 }
+
+fun RotationalDirection.opposite(): RotationalDirection = if (isClockwise()) Clockwise else CounterClockwise

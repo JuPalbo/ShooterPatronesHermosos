@@ -46,16 +46,15 @@ object RobotContainer
                  ShooterState.ButtonMode -> {
 
                     driverController.leftTrigger()
-                        .onTrue(InstantCommand({ shooter.setVoltage(Volts.of(-3.0)) }))
+                        .onTrue(InstantCommand({ shooter.setVoltage(Volts.of(-12.0)) }))
                         .onFalse(InstantCommand(shooter::stopMotors))
 
                     driverController.rightTrigger()
-                        .onTrue(InstantCommand({ shooter.setVoltage(Volts.of(3.0)) }))
+                        .onTrue(InstantCommand({ shooter.setVoltage(Volts.of(12.0)) }))
                         .onFalse(InstantCommand(shooter::stopMotors))
                 }
 
                 ShooterState.TriggerMode ->
-
 
                     when {
                         driverController.rightTriggerAxis > 0.1 ->
