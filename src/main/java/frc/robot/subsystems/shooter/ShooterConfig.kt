@@ -24,15 +24,24 @@ data class ShooterConfig(
     val leadMotorControllerId: NumericID,
     val followerMotorId: NumericID,
     val motorDirection: RotationalDirection,
-    val shootVoltageLowLimit: Voltage,
-    val shootVoltageHighLimit: Voltage
+    val voltageLowLimit: Voltage,
+    val voltageHighLimit: Voltage
 )
-val shooterConfig = ShooterConfig(
+val primaryShooterConfig = ShooterConfig(
     motorProperties = Motors.neo,
     leadMotorControllerId = NumericID(1),
     followerMotorId = NumericID(31),
     motorDirection = Clockwise, // Check the actual direction ,
-    shootVoltageLowLimit = Volts.of(-12.0),
-    shootVoltageHighLimit = Volts.of(12.0)
+    voltageLowLimit = Volts.of(-12.0),
+    voltageHighLimit = Volts.of(12.0)
+)
+
+val secondaryShooterConfig = ShooterConfig(
+    motorProperties = Motors.neo,
+    leadMotorControllerId = NumericID(7),
+    followerMotorId = NumericID(9),
+    motorDirection = Clockwise, // Check the actual direction ,
+    voltageLowLimit = Volts.of(-12.0),
+    voltageHighLimit = Volts.of(12.0)
 )
 

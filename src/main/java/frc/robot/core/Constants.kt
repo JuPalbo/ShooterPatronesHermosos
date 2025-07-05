@@ -11,7 +11,8 @@ object Constants
 {
     object OperatorConstants
     {
-        const val controllerId = 0
+        const val primaryControllerId = 0
+        const val secondaryControllerId = 1
     }
 }
 

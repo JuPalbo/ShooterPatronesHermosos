@@ -8,7 +8,10 @@ import edu.wpi.first.math.MathUtil
 
 import edu.wpi.first.units.Units.*
 import edu.wpi.first.units.measure.*
+import edu.wpi.first.wpilibj2.command.Commands
+import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 
 import frc.robot.subsystems.shooter.ShooterState.*
 import frc.robot.utils.opposite
@@ -45,8 +48,8 @@ class Shooter(private val config: ShooterConfig) : SubsystemBase() {
     override fun periodic() {
         val clampedVoltage =
             MathUtil.clamp(voltageOutPut.`in`(Volts)
-                , shooterConfig.shootVoltageLowLimit.`in`(Volts)
-                , shooterConfig.shootVoltageHighLimit.`in`(Volts))
+                , config.voltageLowLimit.`in`(Volts)
+                , config.voltageHighLimit.`in`(Volts))
         leadMotorController.setVoltage(clampedVoltage)
     }
 
@@ -54,14 +57,13 @@ class Shooter(private val config: ShooterConfig) : SubsystemBase() {
      * The currentState() function returns the [ShooterState] that is currently applied to this subsystem
      * @return the current shooter state, either button or trigger state's
      */
-    @JvmName("ShooterCurrentState")
-    fun currentState(): ShooterState = currentShooterState
+    private fun currentState(): ShooterState = currentShooterState
 
     /**
      * The changeState() uses the [ShooterState] class to change the current state to it's opposite
      * @return a changed state to the shooter
      */
-    fun changeState() {
+    private fun changeState() {
         currentShooterState =
             if (currentState() == ButtonMode) TriggerMode
             else ButtonMode
@@ -71,7 +73,7 @@ class Shooter(private val config: ShooterConfig) : SubsystemBase() {
      * This function accepts voltage and passes it to the motor controller through [voltageOutPut]
      * @param voltage the desired voltage for the motor
      */
-    fun setVoltage(voltage: Voltage) {
+    private fun setVoltage(voltage: Voltage) {
         voltageOutPut = voltage
     }
 
@@ -80,7 +82,7 @@ class Shooter(private val config: ShooterConfig) : SubsystemBase() {
      * @param voltage the desired voltage to add
      * @return returns a new [voltageOutPut] value that is set to the motor plus one
      */
-    fun addVolts(voltage: Voltage) {
+    private fun addVolts(voltage: Voltage) {
         voltageOutPut = voltageOutPut.plus(voltage)
     }
 
@@ -89,7 +91,7 @@ class Shooter(private val config: ShooterConfig) : SubsystemBase() {
      * @param voltage the desired voltage to subtract
      * @return returns a new [voltageOutPut] value that is set to the motor minus one
      */
-    fun subtractsVolts(voltage: Voltage) {
+    private fun subtractsVolts(voltage: Voltage) {
         voltageOutPut = voltageOutPut.minus(voltage)
     }
 
@@ -97,12 +99,51 @@ class Shooter(private val config: ShooterConfig) : SubsystemBase() {
      * This function is able to set the motor's [voltageOutPut] to 0 and therefore, stop the motor's
      * interaction
      */
-    fun stopMotors() {
+    private fun stopMotors() {
         voltageOutPut = Volts.of(0.0)
     }
 
     init {
         configureMotorsInterface()
+    }
+
+    fun assignBindingsToController(controller: CommandXboxController) {
+
+        //Changes from Button State to Trigger State and vice versa
+        controller.x().onTrue(InstantCommand({ changeState()} ))
+
+        //Prints the current shooter State so the user knows which bindings are available
+        controller.y().onTrue(InstantCommand({ println(currentState().toString()) }))
+    }
+
+    fun setShooterDefaultCommand(controller: CommandXboxController) {
+
+        defaultCommand = Commands.run({
+            when (currentState()) {
+                ButtonMode -> {
+                    controller.leftTrigger()
+                        .onTrue(InstantCommand({ setVoltage(Volts.of(-12.0)) }))
+                        .onFalse(InstantCommand(::stopMotors))
+
+                    controller.rightTrigger()
+                        .onTrue(InstantCommand({ setVoltage(Volts.of(12.0)) }))
+                        .onFalse(InstantCommand(::stopMotors))
+
+                    controller.b().onTrue(InstantCommand({ addVolts(Volts.of(1.0)) }))
+
+                    controller.a().onTrue(InstantCommand({ subtractsVolts(Volts.of(1.0)) }))
+                }
+
+                TriggerMode -> when {
+                    controller.rightTriggerAxis > 0.1 ->
+                        setVoltage(Volts.of(10.0.times(controller.rightTriggerAxis)))
+                    controller.leftTriggerAxis > 0.1 ->
+                        setVoltage(Volts.of((-10.0).times(controller.leftTriggerAxis)))
+                    else -> stopMotors()
+                }
+            }
+        }, this
+        )
     }
 
     /**
@@ -138,4 +179,5 @@ class Shooter(private val config: ShooterConfig) : SubsystemBase() {
         )
     }
 }
+
 
